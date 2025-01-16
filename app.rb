@@ -21,5 +21,10 @@ post '/convert' do
     end
   end
 
-  
+  # Safe file to public folder
+  excel_filename = "output_#{Time.now.to_i}.xlsx"
+  p.serialize("public/#{excel_filename}")
+
+  # redirect to results page
+  redirect "/result?file=#{excel_filename}"
 end
