@@ -1,6 +1,9 @@
 require 'ruby_powerpoint'
 
 class PPTXParser
+  # Parse a PowerPoint file for specific labels and their values
+  # @param path [String] The file path of the PowerPoint file to parse
+  # @return [Array<Hash>] An Array of hashes containing the parsed data or an empty array if any error occurs
   def self.parse(path)
     data = []
     begin
@@ -9,8 +12,8 @@ class PPTXParser
       # File not found error
       puts "Error: PowerPoint file not found at #{path}."
       return []
-    rescue RubyPowerpoint::Error => e
-      # Hnadle RubyPowerpoint specific errors
+    rescue RubyPowerpoint::Error => e # Note: verify this error class name with the documentation for the gem
+      # Handle RubyPowerpoint specific errors
       puts "Error parsing PowerPoint file: #{e.message}"
       return []
     rescue => e
