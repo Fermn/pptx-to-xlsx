@@ -9,7 +9,13 @@ class App < Sinatra::Base
 
   post '/convert' do
     # Make sure file was uploaded
-    unless params[:file] && (tmpfile = params[:file][:tempfile]) && (name = params[:file][:filename])
+    if params['file']
+      tempfile = params['file'][:tempfile]
+      name = params['file'][:filename]
+      unless tempfile && name
+        return "File upload incomplete"
+      end
+    else 
       return "No file uploaded"
     end
 
@@ -40,4 +46,8 @@ class App < Sinatra::Base
   end
 
   run! if app_file == $0
+  trap('INT') do
+    puts "Shutting down..."
+    exit
+  end
 end
