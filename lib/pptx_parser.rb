@@ -8,17 +8,14 @@ class PPTXParser
     data = []
     begin
       deck = RubyPowerpoint::Presentation.new(path)
-    rescue Errno::ENOENT => e
-      # File not found error
-      puts "Error: PowerPoint file not found at #{path}."
+    rescue Errno::ENOENT
+      puts "File not found at path: #{path}"
       return []
-    rescue RubyPowerpoint::Error => e # Note: verify this error class name with the documentation for the gem
-      # Handle RubyPowerpoint specific errors
-      puts "Error parsing PowerPoint file: #{e.message}"
+    rescue Errno::EACCES
+      puts "Permission denied for file: #{path}"
       return []
-    rescue => e
-      # Catch any other errors
-      puts "An unexpected error occurred: #{e.message}"
+    rescue => e # General catch-all for any other Ruby exceptions
+      puts "Unexpected error occurred: #{e.class} - #{e.message}"
       return []
     end
 
@@ -27,11 +24,12 @@ class PPTXParser
       slide.content.each do |text|
         lower_text = text.downcase
         if lower_text.include?("title:")
-          slide_data[:title] = text.split(':', 2).last.strip
+          slide_data[:title] = text.split(':', 2).last.strip.downcase
         elsif lower_text.include?("size-card:")
           slide_data[:size_card] = text.split(':', 2).last.strip
         elsif lower_text.include?("color-ways:")
-          slide_data[:color_ways] = text.split(':', 2).last.strip
+          color_ways = text.split(':', 2).last.strip.split(', ').map(&:downcase)
+          slide_data[:color_ways] = color_ways
         end
       end
       data << slide_data unless slide_data.empty?

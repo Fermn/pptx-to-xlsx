@@ -1,7 +1,8 @@
 require 'sinatra'
-require 'axlsx'
+require 'caxlsx'
 require 'ruby_powerpoint'
 require_relative 'lib/pptx_parser'
+
 class App < Sinatra::Base
   get '/' do
     erb :index
@@ -19,16 +20,28 @@ class App < Sinatra::Base
       return "No file uploaded"
     end
 
+    puts "Tempfile: #{tempfile.inspect}"
+    puts "File path: #{tempfile.path}"
     # Parse PowerPoint file
-    pptx_data = PPTXParser.parse(tmpfile.path)
+    pptx_data = PPTXParser.parse(tempfile.path)
 
     # Create Excel file
     p = Axlsx::Package.new
     wb = p.workbook
-    wb.add_worksheet(:name => "Data") do |sheet|
-      sheet.add_row[:Title, :Size_Card, :Color_Ways]
+    wb.add_worksheet(:name => "FINAL_PO") do |sheet|
+      sheet.add_row [:Title, :Color_Ways, :Size_Card]
       pptx_data.each do |row|
-        sheet.add_row row.values
+        title = row[:title] || ''
+        color_ways = row[:color_ways] || []
+        size_card = row[:size_card] || ''
+
+        if color_ways.empty?
+          sheet.add_row [title, size_card, '']
+        else
+          color_ways.each do |color|
+            sheet.add_row [title, color, size_card]
+          end
+        end
       end
     end
 
